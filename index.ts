@@ -5,9 +5,13 @@ import ytdl from "ytdl-core";
 dotenv.config();
 
 const APIKey = process.env.ASSEMBLY_API_KEY;
-const audioSource = "https://youtu.be/NWGzAwqfOG4";
-const audioFile = "audio.mp3";
+// https://youtu.be/NWGzAwqfOG4
+const audioSource = "https://youtu.be/PWfRu5YQahs";
+const audioFile = "./audio.wav";
 let audioURL = "";
+let transcriptId = "";
+let status = "";
+let profanityFilter = false;
 
 const assembly = axios.create({
   baseURL: "https://api.assemblyai.com/v2",
@@ -18,29 +22,41 @@ const assembly = axios.create({
   },
 });
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 // Need to pipe it to api call instead of saving locally
-await ytdl(audioSource, { filter: "audioonly" }).pipe(
-  fs.createWriteStream(audioFile)
-);
+await ytdl(audioSource, { filter: "audioonly" })
+  .pipe(await fs.createWriteStream(audioFile))
+  .on("finish", async () => {
+    fs.readFile(audioFile, async (err, data) => {
+      if (err) return console.error(err);
 
-await fs.readFile(audioFile, (err, data) => {
-  if (err) return console.error(err);
+      await assembly
+        .post("/upload", data)
+        .then((res) => (audioURL = res.data.upload_url))
+        .catch((err) => console.error(err));
 
-  assembly
-    .post("/upload", data)
-    .then((res) => {
-      console.log(res.data);
-      audioURL = res.data.upload_url;
-    })
-    .catch((err) => console.error(err));
-});
+      await assembly
+        .post("/transcript", {
+          audio_url: audioURL,
+          sentiment_analysis: true,
+          filter_profanity: profanityFilter,
+        })
+        .then((res) => (transcriptId = res.data.id))
+        .catch((err) => console.error(err));
 
-// audioURl is empty
-console.log(`audio URL: ${audioURL}`);
+      await assembly
+        .get(`/transcript/${transcriptId}`)
+        .then((res) => (status = res.data.staus));
 
-assembly
-  .post("/transcript", {
-    audio_url: audioURL,
-  })
-  .then((res) => console.log(res.data))
-  .catch((err) => console.error(err));
+      while (status !== "completed") {
+        await sleep(2000);
+        await assembly.get(`/transcript/${transcriptId}`).then((res) => {
+          status = res.data.status;
+          if (status === "completed") {
+            console.log(res.data);
+          }
+        });
+      }
+    });
+  });
