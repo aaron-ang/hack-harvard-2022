@@ -80,4 +80,4 @@ const processLink = async (audioSource: string) => {
     });
 };
 
-app.listen(3000)
+app.listen(3000, () => {"running"})
