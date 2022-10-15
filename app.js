@@ -3,12 +3,17 @@ import fs from "fs";
 import axios from "axios";
 import express from "express";
 import ytdl from "ytdl-core";
+import bodyParser from "body-parser";
 dotenv.config();
 const APIKey = process.env.ASSEMBLY_API_KEY;
 const audioFile = `./audio_${Math.floor(Math.random() * 1000)}.wav`;
 const app = express();
 let audioSource;
 let profanityFilter;
+
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // POST method route
 app.post("/", async (req, res) => {
     audioSource = req.body.link;
@@ -69,4 +74,6 @@ const processLink = async (audioSource) => {
         });
     });
 };
-app.listen(3000);
+app.listen(3000, () => {
+    console.log("running");
+});
