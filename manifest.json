@@ -1,0 +1,10 @@
+{
+    "name": "YouTube Video Transcription",
+    "version": "1.0.0",
+    "description": "Transcribe YouTube Videos",
+    "manifest_version": 3,
+    "action":{
+        "default_popup": "browser_index.html",
+        "default_title": "Transcribe YouTube Videos"
+    }
+}
