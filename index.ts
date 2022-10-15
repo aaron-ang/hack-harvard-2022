@@ -3,6 +3,7 @@ import fs from "fs";
 import axios from "axios";
 import express from "express";
 import ytdl from "ytdl-core";
+import bodyParser from "body-parser";
 dotenv.config();
 
 const APIKey = process.env.ASSEMBLY_API_KEY;
@@ -12,11 +13,17 @@ const app = express();
 let audioSource: string;
 let profanityFilter: boolean;
 
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
+
 // POST method route
 app.post("/", async (req, res) => {
   audioSource = req.body.link;
   profanityFilter = req.body.profanityFilter;
-  res.send(await processLink(audioSource));
+  console.log(req.body);
+  if (audioSource !== undefined) {
+    res.send(await processLink(audioSource));
+  }
 });
 
 const assembly = axios.create({
@@ -31,7 +38,9 @@ const assembly = axios.create({
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 const processLink = async (audioSource: string) => {
-  ytdl(audioSource, { filter: "audioonly" })
+  let returnVal;
+
+  await ytdl(audioSource, { filter: "audioonly" })
     .pipe(fs.createWriteStream(audioFile))
     .on("finish", () => {
       fs.readFile(audioFile, async (err, data) => {
@@ -71,13 +80,17 @@ const processLink = async (audioSource: string) => {
                   console.log(`${audioFile} was deleted`);
                 });
 
-                return res.data;
+                returnVal = res.data;
               }
             })
             .catch((err) => console.error(err));
         }
       });
     });
+
+  return returnVal;
 };
 
-app.listen(3000, () => {"running"})
+app.listen(3000, () => {
+  console.log("Server running on port 3000");
+});

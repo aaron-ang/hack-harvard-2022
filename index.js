@@ -10,15 +10,16 @@ const audioFile = `./audio_${Math.floor(Math.random() * 1000)}.wav`;
 const app = express();
 let audioSource;
 let profanityFilter;
-
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-
 // POST method route
 app.post("/", async (req, res) => {
     audioSource = req.body.link;
     profanityFilter = req.body.profanityFilter;
-    res.send(await processLink(audioSource));
+    console.log(req.body);
+    if (audioSource !== undefined) {
+        res.send(await processLink(audioSource));
+    }
 });
 const assembly = axios.create({
     baseURL: "https://api.assemblyai.com/v2",
@@ -30,7 +31,8 @@ const assembly = axios.create({
 });
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 const processLink = async (audioSource) => {
-    ytdl(audioSource, { filter: "audioonly" })
+    let returnVal;
+    await ytdl(audioSource, { filter: "audioonly" })
         .pipe(fs.createWriteStream(audioFile))
         .on("finish", () => {
         fs.readFile(audioFile, async (err, data) => {
@@ -66,14 +68,15 @@ const processLink = async (audioSource) => {
                                 throw err;
                             console.log(`${audioFile} was deleted`);
                         });
-                        return res.data;
+                        returnVal = res.data;
                     }
                 })
                     .catch((err) => console.error(err));
             }
         });
     });
+    return returnVal;
 };
 app.listen(3000, () => {
-    console.log("running");
+    console.log("Server running on port 3000");
 });
