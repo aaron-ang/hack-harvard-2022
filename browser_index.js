@@ -10,10 +10,13 @@ const getTranscription = () => {
       try {
         let response = await fetch("http://localhost:3000", {
           method: "POST",
-          body: {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
             link: link,
             isFiltered: isFiltered,
-          },
+          }),
         });
 
         let data = await response.json();
