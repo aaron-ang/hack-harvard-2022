@@ -5,7 +5,7 @@ import ytdl from "ytdl-core";
 dotenv.config();
 
 const APIKey = process.env.ASSEMBLY_API_KEY;
-const audioSource = "https://youtu.be/WO7wT-FX2mA";
+const audioSource = "https://youtu.be/NWGzAwqfOG4";
 const audioFile = "audio.mp3";
 let audioURL = "";
 
@@ -19,7 +19,7 @@ const assembly = axios.create({
 });
 
 // Need to pipe it to api call instead of saving locally
-await ytdl("https://youtu.be/NWGzAwqfOG4", { filter: "audioonly" }).pipe(
+await ytdl(audioSource, { filter: "audioonly" }).pipe(
   fs.createWriteStream(audioFile)
 );
 
@@ -35,6 +35,7 @@ await fs.readFile(audioFile, (err, data) => {
     .catch((err) => console.error(err));
 });
 
+// audioURl is empty
 console.log(`audio URL: ${audioURL}`);
 
 assembly
