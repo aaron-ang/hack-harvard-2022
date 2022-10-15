@@ -1,24 +1,31 @@
-const getTranscription = async () => {
-  const link = "https://www.youtube.com/shorts/8_F3eEXfYYg";
-  const isFiltered = document.getElementById("filterProfanities").checked;
+const getTranscription = () => {
+  // Get the url of the currently open link.
+  chrome.tabs.query(
+    { active: true, currentWindow: true },
+    async function (tabs) {
+      let link = tabs[0].url;
+      let isFiltered = document.getElementById("filterProfanities").checked;
 
-  try {
-    const response = await fetch("http://localhost:3000", {
-      method: "POST",
-      body: JSON.stringify({
-        link: link,
-        isFiltered: isFiltered,
-      }),
-    });
+      // Call the AssemblyAI api to transcribe video.
+      try {
+        let response = await fetch("http://localhost:3000", {
+          method: "POST",
+          body: {
+            link: link,
+            isFiltered: isFiltered,
+          },
+        });
 
-    const data = response.json();
+        let data = await response.json();
 
-    console.log(data);
-  } catch (e) {
-    console.log(e);
-  }
+        console.log(data);
+      } catch (e) {
+        console.log(e);
+      }
+    }
+  );
 };
 
 document
-  .getElementById("transcribe")
+  .getElementById("transcribeBtn")
   .addEventListener("click", getTranscription);
