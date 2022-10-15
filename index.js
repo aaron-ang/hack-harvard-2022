@@ -27,7 +27,6 @@ const assembly = axios.create({
 app.post("/", async (req, res) => {
     audioSource = req.body.link;
     profanityFilter = req.body.profanityFilter;
-    console.log("start");
     ytdl(audioSource, { filter: "audioonly" })
         .pipe(fs.createWriteStream(audioFile))
         .on("finish", () => {
@@ -37,22 +36,24 @@ app.post("/", async (req, res) => {
             let audioURL = "";
             let transcriptId = "";
             let status = "";
-            assembly.post("/upload", data)
+            assembly
+                .post("/upload", data)
                 .then((response) => {
                 audioURL = response.data.upload_url;
-                assembly.post("/transcript", {
+                assembly
+                    .post("/transcript", {
                     audio_url: audioURL,
                     sentiment_analysis: true,
                     filter_profanity: profanityFilter,
                 })
                     .then((response) => {
                     transcriptId = response.data.id;
-                    assembly.get(`/transcript/${transcriptId}`)
+                    assembly
+                        .get(`/transcript/${transcriptId}`)
                         .then(async (response) => {
                         status = response.data.status;
                         while (status !== "completed") {
                             await sleep(2000);
-                            console.log("wha");
                             let response = await assembly.get(`/transcript/${transcriptId}`);
                             status = response.data.status;
                             if (status === "completed") {
@@ -61,7 +62,6 @@ app.post("/", async (req, res) => {
                                         throw err;
                                     console.log(`${audioFile} was deleted`);
                                 });
-                                console.log(response.data);
                                 res.json(response.data);
                             }
                         }

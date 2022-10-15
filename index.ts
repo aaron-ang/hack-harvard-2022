@@ -29,13 +29,10 @@ const assembly = axios.create({
   },
 });
 
-
 // POST method route
 app.post("/", async (req, res) => {
   audioSource = req.body.link;
   profanityFilter = req.body.profanityFilter;
-
-  console.log("start");
 
   ytdl(audioSource, { filter: "audioonly" })
     .pipe(fs.createWriteStream(audioFile))
@@ -47,40 +44,42 @@ app.post("/", async (req, res) => {
         let transcriptId = "";
         let status = "";
 
-        assembly.post("/upload", data)
+        assembly
+          .post("/upload", data)
           .then((response) => {
             audioURL = response.data.upload_url;
-            assembly.post("/transcript", {
-            audio_url: audioURL,
-            sentiment_analysis: true,
-            filter_profanity: profanityFilter,
-            })
-            .then((response) => {
-              transcriptId = response.data.id
-              assembly.get(`/transcript/${transcriptId}`)
-                .then(async (response) => {
-                  status = response.data.status
-
-                  while (status !== "completed") {
-                    await sleep(2000);
-                    console.log("wha");
-
-                    let response = await assembly.get(`/transcript/${transcriptId}`);
+            assembly
+              .post("/transcript", {
+                audio_url: audioURL,
+                sentiment_analysis: true,
+                filter_profanity: profanityFilter,
+              })
+              .then((response) => {
+                transcriptId = response.data.id;
+                assembly
+                  .get(`/transcript/${transcriptId}`)
+                  .then(async (response) => {
                     status = response.data.status;
 
-                    if (status === "completed") {
-                      fs.unlink(audioFile, (err) => {
-                        if (err) throw err;
-                        console.log(`${audioFile} was deleted`);
-                      });
+                    while (status !== "completed") {
+                      await sleep(2000);
 
-                      console.log(response.data);
-                      res.json(response.data);
+                      let response = await assembly.get(
+                        `/transcript/${transcriptId}`
+                      );
+                      status = response.data.status;
+
+                      if (status === "completed") {
+                        fs.unlink(audioFile, (err) => {
+                          if (err) throw err;
+                          console.log(`${audioFile} was deleted`);
+                        });
+                        res.json(response.data);
+                      }
                     }
-                  }
-                });
-            })
-            .catch((err) => console.error(err));
+                  });
+              })
+              .catch((err) => console.error(err));
           })
           .catch((err) => console.error(err));
       });
