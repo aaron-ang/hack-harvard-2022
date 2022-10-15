@@ -4,7 +4,10 @@
     "description": "Transcribe YouTube Videos",
     "manifest_version": 3,
     "action":{
-        "default_popup": "browser_index.html",
+        "default_popup": "index.html",
         "default_title": "Transcribe YouTube Videos"
-    }
+    },
+    "permissions": [
+        "tabs"
+    ]
 }
