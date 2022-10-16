@@ -43,6 +43,8 @@ app.post("/", async (req, res) => {
         let transcriptId = "";
         let status = "";
 
+        // Upload audio file to AssemblyAI
+        console.log("Uploading audio file to AssemblyAI...");
         assembly
           .post("/upload", data)
           .then((response) => {
@@ -55,6 +57,8 @@ app.post("/", async (req, res) => {
               })
               .then((response) => {
                 transcriptId = response.data.id;
+                // Transcribe audio file
+                console.log("Transcribing audio file...");
                 assembly
                   .get(`/transcript/${transcriptId}`)
                   .then(async (response) => {
@@ -62,13 +66,13 @@ app.post("/", async (req, res) => {
 
                     while (status !== "completed") {
                       await sleep(2000);
-
                       const response = await assembly.get(
                         `/transcript/${transcriptId}`
                       );
                       status = response.data.status;
 
                       if (status === "completed") {
+                        console.log("Transcription complete!");
                         fs.unlink(audioFile, (err) => {
                           if (err) throw err;
                           console.log(`${audioFile} was deleted`);
