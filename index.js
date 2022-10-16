@@ -26,7 +26,7 @@ const assembly = axios.create({
 // POST method route
 app.post("/", async (req, res) => {
     audioSource = req.body.link;
-    profanityFilter = req.body.profanityFilter;
+    profanityFilter = req.body.isFiltered;
     ytdl(audioSource, { filter: "audioonly" })
         .pipe(fs.createWriteStream(audioFile))
         .on("finish", () => {
