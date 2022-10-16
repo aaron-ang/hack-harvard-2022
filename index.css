@@ -2,14 +2,17 @@
 
 body {
     background-color: #292a2d;
+    color: white;
     font-family: "Ubuntu", sans-serif;
     margin: 0;
-    padding: 3%;
-    color: white;
+    padding: 10% 3%;
+    width: 200px;
 }
 
 .btn-transcribe {
     width: 100%;
+    height: 50px;
+    margin-top: 5%;
     background-color: transparent;
     color: #5dbea3;
     border: 1px solid #5dbea3;
@@ -18,4 +21,13 @@ body {
 .btn-transcribe:hover {
     background-color: #5dbea3;
     color: white;
+}
+
+.btn-transcribe-loading {
+    width: 100%;
+    height: 75px;
+    margin-top: 5%;
+    background-color: transparent;
+    color: #5dbea3;
+    border: 1px solid #5dbea3;
 }
