@@ -22,12 +22,12 @@ const getTranscription = () => {
     async function (tabs) {
       setLoadingState();
 
-      let link = tabs[0].url;
-      let isFiltered = document.getElementById("filterProfanities").checked;
+      const link = tabs[0].url;
+      const isFiltered = document.getElementById("filterProfanities").checked;
 
       // Call the AssemblyAI api to transcribe video.
       try {
-        let response = await fetch("http://localhost:3000", {
+        const response = await fetch("http://localhost:3000", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -38,14 +38,32 @@ const getTranscription = () => {
           }),
         });
 
-        let data = await response.json();
+        const data = await response.json();
 
-        // Download the text received as a text file.
-        let blob = new Blob([data.text], { type: "text/plain" });
-        let url = URL.createObjectURL(blob);
-        chrome.downloads.download({
-          url: url,
-        });
+        // analyze sentiment of the transcription.
+        const safety = data.content_safety_labels.summary;
+        if (safety.profanity > 0.5 || safety.nsfw > 0.5) {
+          if (
+            confirm(
+              "This video contains profanity or NSFW content. Continue downloading transcript?"
+            )
+          ) {
+            // Download the text received as a text file.
+            const blob = new Blob([data.text], { type: "text/plain" });
+            const url = URL.createObjectURL(blob);
+            chrome.downloads.download({
+              url: url,
+            });
+          } else {
+            return;
+          }
+        } else {
+          const blob = new Blob([data.text], { type: "text/plain" });
+          const url = URL.createObjectURL(blob);
+          chrome.downloads.download({
+            url: url,
+          });
+        }
       } catch (e) {
         console.log(e);
       } finally {

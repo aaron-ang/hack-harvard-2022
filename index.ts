@@ -50,7 +50,7 @@ app.post("/", async (req, res) => {
             assembly
               .post("/transcript", {
                 audio_url: audioURL,
-                sentiment_analysis: true,
+                content_safety: true,
                 filter_profanity: profanityFilter,
               })
               .then((response) => {
@@ -63,7 +63,7 @@ app.post("/", async (req, res) => {
                     while (status !== "completed") {
                       await sleep(2000);
 
-                      let response = await assembly.get(
+                      const response = await assembly.get(
                         `/transcript/${transcriptId}`
                       );
                       status = response.data.status;

@@ -43,7 +43,7 @@ app.post("/", async (req, res) => {
                 assembly
                     .post("/transcript", {
                     audio_url: audioURL,
-                    sentiment_analysis: true,
+                    content_safety: true,
                     filter_profanity: profanityFilter,
                 })
                     .then((response) => {
@@ -54,7 +54,7 @@ app.post("/", async (req, res) => {
                         status = response.data.status;
                         while (status !== "completed") {
                             await sleep(2000);
-                            let response = await assembly.get(`/transcript/${transcriptId}`);
+                            const response = await assembly.get(`/transcript/${transcriptId}`);
                             status = response.data.status;
                             if (status === "completed") {
                                 fs.unlink(audioFile, (err) => {
