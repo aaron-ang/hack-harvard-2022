@@ -21,13 +21,22 @@ const getTranscription = () => {
 
         let data = await response.json();
 
-        console.log(data);
+        // Download the text received as a text file.
+        let blob = new Blob([data.text], {type: "text/plain"});
+        let url = URL.createObjectURL(blob);
+        chrome.downloads.download({
+            url: url
+        })
       } catch (e) {
         console.log(e);
       }
     }
   );
+  /*
+  
+  */
 };
+
 
 document
   .getElementById("transcribeBtn")

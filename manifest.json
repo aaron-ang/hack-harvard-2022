@@ -8,6 +8,7 @@
         "default_title": "Transcribe YouTube Videos"
     },
     "permissions": [
-        "tabs"
+        "tabs",
+        "downloads"
     ]
 }
